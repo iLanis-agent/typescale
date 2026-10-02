@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScale - Type scale and CSS unit converter</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#161d1b; color:#eaf3ef; line-height:1.5; }
+  .wrap { max-width:680px; margin:0 auto; padding:26px 18px 60px; }
+  a { color:#6fe0b8; } h1 { font-size:28px; } h1 span { color:#6fe0b8; } .sub { color:#9ab5ab; margin:4px 0 18px; }
+  .card { background:#202b28; border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#9ab5ab; margin:10px 0 4px; }
+  .row { display:flex; gap:10px; } .row > div { flex:1; }
+  input, select { width:100%; padding:11px; border-radius:9px; border:1px solid #3d524b; background:#161d1b; color:#eaf3ef; font-size:16px; font-family:inherit; }
+  input.bad { border-color:#e0746a; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; } td, th { padding:7px 4px; border-top:1px solid #31433d; font-size:14px; text-align:right; } th { color:#9ab5ab; font-weight:600; } td:first-child, th:first-child { text-align:left; }
+  .sample { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:left; max-width:230px; color:#eaf3ef; }
+  .big { font-size:40px; font-weight:800; color:#6fe0b8; } .lbl { font-size:13px; color:#9ab5ab; } h2 { font-size:17px; margin-bottom:8px; } .small { font-size:13px; color:#9ab5ab; }
+  pre { background:#161d1b; border-radius:9px; padding:12px; font-size:13px; overflow:auto; margin-top:8px; }
+  .warn { background:#3d2a20; border:1px solid #b9703f; color:#ffddc4; padding:12px; border-radius:10px; margin-top:12px; font-size:14px; }
+  button { margin-top:8px; padding:9px 14px; border-radius:9px; border:1px solid #3d524b; background:#161d1b; color:#eaf3ef; font-size:14px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Type<span>Scale</span></h1>
+  <div class="sub">Pick a base size and a ratio to get a harmonious set of font sizes in px, rem and pt. Convert any CSS length too.</div>
+  <div class="card">
+    <div class="row"><div><label for="base">Base size (px)</label><input id="base" inputmode="decimal" value="16"></div><div><label for="ratio">Scale ratio</label><select id="ratio"></select></div></div>
+    <table id="tbl"></table>
+    <div class="small" style="margin-top:8px">Step 0 is the body size. Each step up multiplies by the ratio.</div>
+    <pre id="css"></pre><button id="copy">Copy CSS</button>
+  </div>
+  <div class="card">
+    <h2>Convert a length</h2>
+    <div class="row"><div><label for="v">Value</label><input id="v" inputmode="decimal" value="12"></div><div><label for="from">From</label><select id="from"></select></div><div><label for="to">To</label><select id="to"></select></div></div>
+    <div style="margin-top:10px"><div class="lbl">Result</div><div class="big" id="res"></div></div>
+  </div>
+  <div class="card"><h2>About this</h2><div class="small">Absolute units follow the <a href="https://www.w3.org/TR/css-values-3/#absolute-lengths">W3C CSS Values spec</a>: 1in = 96px = 72pt = 6pc = 2.54cm, so 12pt = 16px. rem and em use your base size here. The scale is size = base x ratio^step, with exact ratios (a perfect fourth is 4/3, so step 2 at 16px is 28.44, where some tools using 1.333 show 28.43). Runs in your browser.</div></div>
+</div>
+<script src="engine.js"></script>
+<script>
+var $ = function (i) { return document.getElementById(i); };
+Object.keys(TS.RATIOS).forEach(function (k) { var o = document.createElement('option'); o.value = TS.RATIOS[k]; o.textContent = k; $('ratio').appendChild(o); }); $('ratio').selectedIndex = 3;
+var units = ['px', 'rem', 'em', 'pt', 'pc', 'in', 'cm', 'mm']; units.forEach(function (u) { ['from', 'to'].forEach(function (s) { var o = document.createElement('option'); o.value = u; o.textContent = u; $(s).appendChild(o); }); }); $('from').value = 'pt'; $('to').value = 'px';
+function num(id) { var v = $(id).value.trim(); var ok = /^\d*\.?\d+$/.test(v); $(id).className = ok ? '' : 'bad'; return ok ? parseFloat(v) : null; }
+function render() {
+  var b = num('base'), r = parseFloat($('ratio').value);
+  if (b == null || b < 4 || b > 100) { $('tbl').innerHTML = '<tr><td><div class="warn" id="err">Enter a base size between 4 and 100 px.</div></td></tr>'; $('css').textContent = ''; }
+  else {
+    var h = '<tr><th>Step</th><th>px</th><th>rem</th><th>pt</th><th>Sample</th></tr>';
+    TS.scale(b, r, -2, 6).reverse().forEach(function (s) { h += '<tr' + (s.step === 0 ? ' style="color:#6fe0b8;font-weight:700"' : '') + '><td>' + s.step + '</td><td>' + TS.fmt(s.px) + '</td><td>' + TS.fmt(s.rem) + '</td><td>' + TS.fmt(s.pt) + '</td><td class="sample" style="font-size:' + Math.min(s.px, 48) + 'px">Aa Quick fox</td></tr>'; });
+    $('tbl').innerHTML = h; $('css').textContent = ':root {\n  --text-base-size: ' + TS.fmt(b) + 'px;\n' + TS.css(b, r, -2, 6) + '\n}';
+  }
+  var v = num('v'), base = b == null ? 16 : b;
+  $('res').textContent = v == null ? '-' : TS.fmt(TS.convert(v, $('from').value, $('to').value, base)) + ' ' + $('to').value;
+}
+['base', 'v'].forEach(function (id) { $(id).oninput = render; }); ['ratio', 'from', 'to'].forEach(function (id) { $(id).onchange = render; });
+$('copy').onclick = function () { if (navigator.clipboard) navigator.clipboard.writeText($('css').textContent); $('copy').textContent = 'Copied'; setTimeout(function () { $('copy').textContent = 'Copy CSS'; }, 1200); };
+render();
+</script>
+</body>
+</html>
