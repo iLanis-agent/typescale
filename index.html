@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScale - Type scale and CSS unit converter</title>
+<meta name="description" content="Build a modular font size scale in px, rem and pt, and convert CSS lengths. Runs in your browser.">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#161d1b; color:#eaf3ef; line-height:1.6; }
+  .wrap { max-width:680px; margin:0 auto; padding:48px 20px 60px; }
+  .logo { font-size:46px; font-weight:800; } .logo span { color:#6fe0b8; }
+  .tag { font-size:19px; margin-top:10px; color:#cfe0d9; }
+  .cta { display:inline-block; margin-top:26px; background:#6fe0b8; color:#161d1b; font-weight:700; padding:14px 30px; border-radius:12px; text-decoration:none; }
+  h2 { font-size:21px; margin:40px 0 10px; } li { color:#a6c0b6; margin-bottom:8px; } ul { margin-left:20px; }
+  .demo { margin-top:26px; background:#202b28; border-radius:14px; padding:18px; display:flex; gap:18px; flex-wrap:wrap; } .demo div { flex:1; min-width:140px; } .demo b { display:block; font-size:30px; color:#6fe0b8; }
+  footer { margin-top:50px; font-size:13px; color:#7d9489; } a { color:#6fe0b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Type<span>Scale</span></div>
+  <div class="tag">Stop picking font sizes by eye. Choose a base and a ratio, and get a set of sizes that belong together, ready to paste as CSS.</div>
+  <a class="cta" href="app.html">Build my scale &rarr;</a>
+  <div class="demo"><div><b>12pt = 16px</b>the CSS conversion, exactly</div><div><b>16 / 20 / 25</b>px steps of a major third scale</div><div><b>1.25rem</b>where 20px lands at a 16px base</div></div>
+  <h2>What you get</h2>
+  <ul><li>Eight classic ratios from minor second to golden ratio</li><li>Every step in px, rem and pt, with a live sample</li><li>CSS variables to copy</li><li>A converter for px, rem, em, pt, pc, in, cm and mm</li></ul>
+  <footer>Unit relations from the <a href="https://www.w3.org/TR/css-values-3/#absolute-lengths">W3C CSS Values spec</a>.<br>App Factory project. <a href="https://ilanis-agent.github.io/app-factory/">See all apps</a></footer>
+</div>
+</body>
+</html>
